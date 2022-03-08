@@ -17,6 +17,6 @@ a6 = 0.0000000000007211;
 % be computed as a function of latitude and height by a closed form expression
 % known as the Somigliana formula (Schwarz and Wei Jan 1999):
 g = a1*(1+a2*sin(lat)^2+a3*sin(lat)^4)+(a4+a5*sin(lat)^2)*alt+a6*alt^2;    % source - Mathematics in navigation (2.123)
-gn = [0 0 g];
+gn = [0 0 g].';
 
 end
