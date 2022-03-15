@@ -9,7 +9,7 @@ data_gpsP = [data(:,20), data(:,21), data(:,22)];
 data_gpsV = [data(:,28), data(:,29), data(:,27)];
 
 % data convention:
-% [x, y, z]
+% [x, y, z]jjjjjjj
 % [latitude, longitude, altitude]
 T_sample = 1/200;
 data_length = size(data);
