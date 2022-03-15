@@ -81,34 +81,50 @@ end
 % data_gpsP(any(isnan(data_gpsP),2),:) = []; 
 
 figure;hold on;
+title("XY Position")
 plot(SAVEDp(1,:), SAVEDp(2,:))
 plot(data_gpsP(1:data_length,1), data_gpsP(1:data_length,2), 'o')
+legend('IMU', 'GPS')
 
 figure;hold on;
+title("X position")
 plot(SAVEDp(1,:))
 plot(data_gpsP(1:data_length,1), 'o')
+legend('IMU', 'GPS')
 
 figure;hold on;
+title("Y position")
 plot(SAVEDp(2,:))
 plot(data_gpsP(1:data_length,2), 'o')
+legend('IMU', 'GPS')
 
 figure;hold on;
+title("Z position")
 plot(SAVEDp(3,:))
 plot(data_gpsP(1:data_length,3), 'o')
+legend('IMU', 'GPS')
 
 figure;hold on;
+title("X velocity")
 plot(SAVEDv(1,:))
 plot(data_gpsV(1:data_length,1), 'o')
+legend('IMU', 'GPS')
 
 figure;hold on;
+title("Y velocity")
 plot(SAVEDv(2,:))
 plot(data_gpsV(1:data_length,2), 'o')
+legend('IMU', 'GPS')
 
 figure;hold on;
+title("Z velocity")
 plot(SAVEDv(3,:))
 plot(data_gpsV(1:data_length,3), 'o')
+legend('IMU', 'GPS')
 
 figure;hold on;
+title("Angles (IMU only)")
 plot(SAVEDr(1,:))
 plot(SAVEDr(2,:))
 plot(SAVEDr(3,:))
+legend('Pitch', 'Roll', 'Yaw')
