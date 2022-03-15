@@ -28,9 +28,7 @@ for i = 1:data_length
     end
 end
 
-DCM = [1 0 0
-       0 1 0
-       0 0 1];
+DCM = angle2dcm(0, 0, 0.34, "XYZ")
 
 %% pseudo constants
 g_n = getg_n( P(1), P(3) );
@@ -40,6 +38,7 @@ R_N = getR_N( P(1) );
 
 SAVEDp = zeros(3, data_length);
 SAVEDv = zeros(3, data_length);
+SAVEDr = zeros(3, data_length);
 
 %% MAIN LOOP
 for index = 1:data_length
@@ -64,12 +63,17 @@ for index = 1:data_length
                0                             0                    -1 ] * V;
     P = P + dP * T_sample;
 
+    [yaw, roll, pitch] = dcm2angle(DCM, "ZYX");
+
     SAVEDp(1, index) = P(1);
     SAVEDp(2, index) = P(2);
     SAVEDp(3, index) = P(3);
     SAVEDv(1, index) = V(1);
     SAVEDv(2, index) = V(2);
     SAVEDv(3, index) = V(3);
+    SAVEDr(1, index) = rad2deg(pitch);
+    SAVEDr(2, index) = rad2deg(roll);
+    SAVEDr(3, index) = rad2deg(yaw);
 end
 
 
@@ -104,3 +108,7 @@ figure;hold on;
 plot(SAVEDv(3,:))
 plot(data_gpsV(1:data_length,3), 'o')
 
+figure;hold on;
+plot(SAVEDr(1,:))
+plot(SAVEDr(2,:))
+plot(SAVEDr(3,:))
