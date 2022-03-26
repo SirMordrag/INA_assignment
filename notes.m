@@ -16,3 +16,7 @@ SAVED(2, 4:6) = lol;
 SAVED(3,:) = [lol, bol, gol];
 
 SAVED
+
+
+%% NOTES
+% earth rate is ommitted (Wn, We = 0)
