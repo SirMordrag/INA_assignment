@@ -1,6 +1,6 @@
-function [F, G] = get_model_matrices(P, V, DCM, f, w, r, kd, F63, R_M, R_N)
+function [F, G] = get_model_matrices(P, V, DCM, f, w, r, R_M, R_N, T_gps)
     % gets F and G matrix for the model
-    % inputs: position (vec), velocity (vec), DCM (mat), acc (vec), gyro (vec), rho (vec), kd (num), F63 (num), R_M (num), R_N (num)
+    % inputs: position (vec), velocity (vec), DCM (mat), acc (vec), gyro (vec), rho (vec), kd (num), F63 (num), R_M (num), R_N (num), T_gps (num)
     I = eye(3);
     O = zeros(3);
     
@@ -16,9 +16,11 @@ function [F, G] = get_model_matrices(P, V, DCM, f, w, r, kd, F63, R_M, R_N)
     Fpr = O;
     
     %% velocity
+    kd = 0; % see page 397 of book, actually kd = vd / Re, where Re is Earth radius -> waaaaay to small -> omitted
+
     Fvp = [-r(1)*V(2)/cos(P(1))^2     0     r(2)*kd-r(1)*r(3)
             r(1)*V(1)/cos(P(1))^2     0    -r(2)*kd-r(1)*r(3)
-            0                         0     F63];
+            0                         0     r(1)^2 + r(2)^2];
     
     
     Fvv = [ kd         2*w(3)               -r(2)
@@ -47,22 +49,27 @@ function [F, G] = get_model_matrices(P, V, DCM, f, w, r, kd, F63, R_M, R_N)
     
     %% uncertainties
     % dunno
-    Fva = eye(3);
-    Frg = eye(3);
-    Faa = eye(3);
-    Fgg = eye(3);
+    Fva = O;
+    Frg = O;
+    Faa = O;
+    Fgg = O;
     
     %% model
-    F = [ Fpp     Fpv     Fpr     O           O
-          Fvp     Fvv     Fvr    -DCM*Fva     O
-          Frp     Frv     Frr     O           DCM*Frg
-          O       O       O       Faa         O
-          O       O       O       O           Fgg];
+    % continous F
+    F_c   = [ Fpp     Fpv     Fpr     O           O
+              Fvp     Fvv     Fvr    -DCM*Fva     O
+              Frp     Frv     Frr     O           DCM*Frg
+              O       O       O       Faa         O
+              O       O       O       O           Fgg];
+    % discreet F
+    F = eye(15) + F_c * T_gps + 0.5 * T_gps^2 * F_c^2;
     
-    
-    G = [ O     O     O     O
-         -DCM   O     O     O
-          O     DCM   O     O
-          O     O     I     O
-          O     O     O     I];
+    % WARNING element (1,1) is probably missing something (C)
+    % discreet G
+    G = [ O                     O               O     O
+         -DCM * T_gps           O               O     O
+          O                     DCM * T_gps     O     O
+          O                     O               I     O
+          O                     O               O     I];
+
 end
