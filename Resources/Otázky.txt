@@ -1,0 +1,49 @@
+Strapdown:
+> Co a kde vzít F63; kD; Fva, Frg, Faa, Fgg?
+Faa, Fgg - bud je chyba na offsetech konstantní -> Faa = 0, nebo je to exp kor nah proc -> ? (lepsi stabilita)
+Fva, Frg - shaping filter - obarvuje 4. řádek (nezávislý proces)
+kD - doplni
+
+Abstraction:
+> Je moje představa správně?
+Ano
+>Co přesně je state vector pro KF? Co je input? Co je measurement?
+state - delty
+meas - delta meas
+input - neni
+> Je measurement vector Delta meas (tj. dead reckoning - GPS)?
+Ano
+>Jak spočítat H?
+nuly, jedničky
+>Je-li state vektor vynulován, k čemu je F matice?
+Zohlednuje se v P
+
+KF:
+> Initial ro?
+nula
+> State E: jak nastavit ro, dxa a dxg?
+vubec to tam neni, z dim [6]
+> Nulování state vektoru?
+Až po aplikaci odchylek
+> u / q vektor (state I)? Kde vzít?
+q vektor - vsecko skalar
+wa, wg - souvisi s offsetem
+datasheet - bias instability
+ni_a, ni_g - sum snimace + vibrace
+konstantni
+> Jsou f a w korekce z dx / ddx vektoru?
+Ano
+
+
+
+Misc:
+děláme loosely coupled
+signal 18 - validace gps - až potom
+
+Model
+B: offset, neortogonality, vytočení v body (neřeší se)
+E: z vektor (meas) je dealta meas
+F: 
+B: u biasu pozor ve ktere je soustave (b vs n) - lepsi je navigacni, ale pro kreslení nesmysl
+B: u biasu a offsetu není nutné korigovat v každém kroku (třeba každý 10)
+
