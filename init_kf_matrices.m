@@ -30,8 +30,8 @@ function [x_kf, z_kf, P_kf, Q_c, R_kf, K_kf, H_kf, x_kf_predict] = init_kf_matri
 
     % Measurement Uncertainty
     % TUNING
-    r_p = [0.1 0.1 0.1]; % position error (IMU & GPS) [m]
-    r_v = [0.1 0.1 0.1]; % velocity error (IMU & GPS) [m/s]
+    r_p = [0.0001 0.0001 0.1]; % position error (IMU & GPS) [m]
+    r_v = [0.001 0.001 0.001]; % velocity error (IMU & GPS) [m/s]
     R_kf = [r_p r_v].' .* eye(nz);
     
 end

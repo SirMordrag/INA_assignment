@@ -111,8 +111,10 @@ for index = 1:data_length
         % apply corrections to Position, Velocity, DCM immediately
         P = P + x_kf(1:3);
         V = V + x_kf(4:6);
-        [yaw, roll, pitch] = dcm2angle(DCM, "ZYX");
-        DCM = angle2dcm(yaw + x_kf(9), roll + x_kf(8), pitch + x_kf(7), "ZYX");
+%         [yaw, roll, pitch] = dcm2angle(DCM, "ZYX");
+%         DCM = angle2dcm(yaw + x_kf(9), roll + x_kf(8), pitch + x_kf(7), "ZYX");
+        DCM = angle2dcm(x_kf(9), x_kf(8), x_kf(7), "ZYX");
+
         % corrections for for bias of IMU measurements are dx_a and dx_g from state vector (I think)
         f_bias = f_bias + x_kf(10:12)/40; % divide by number of samples that went by in IMU (integration)
         w_bias = w_bias + x_kf(13:15)/40;
@@ -120,7 +122,7 @@ for index = 1:data_length
         %% H: STATE VECTOR RESET
         % set state vector to zeros
         x_kf_saved = x_kf;
-        x_kf = zeros(nx, 1);
+        x_kf = x_kf .* [0 0 0  0 0 0  1 1 1  0 0 0  0 0 0].';
 
         %% I: TIME UPDATE (KF)
         
@@ -129,7 +131,7 @@ for index = 1:data_length
 
         % state extrapolation
         x_kf_predict = zeros(nx, 1);
-        % x_kf_predict = F_kf * x_kf; % case without reset
+        x_kf_predict = F_kf * x_kf; % case without reset
 
         % uncertainty extrapolation
         P_kf_predict = F_kf * P_kf * F_kf.' + Q_kf;
