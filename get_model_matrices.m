@@ -10,7 +10,7 @@ function [F, G] = get_model_matrices(P, V, DCM, f, w, r, R_M, R_N, T_gps)
             0                                           0     0];
     
     Fpv = [ 1/(R_M+P(3))     0                            0 
-            0                1/((R_N+P(3)*cos(P(1))))     0
+            0                1/((R_N+P(3))*cos(P(1)))     0
             0                0                           -1];
     
     Fpr = O;
@@ -33,7 +33,7 @@ function [F, G] = get_model_matrices(P, V, DCM, f, w, r, R_M, R_N, T_gps)
             f(2)    -f(1)     0];   
     
     %% attitude
-    Frp = [ 0                                 0    -V(2)/(R_N+P(3))^2
+    Frp = [ 0                                 0     V(2)/(R_N+P(3))^2
             0                                 0    -V(1)/(R_M+P(3))^2
             V(2)/((R_N+P(3))*cos(P(1))^2)     0    -V(2)*tan(P(1))/(R_N+P(3))^2 ];
     
@@ -66,7 +66,7 @@ function [F, G] = get_model_matrices(P, V, DCM, f, w, r, R_M, R_N, T_gps)
     
     % WARNING element (1,1) is probably missing something (C)
     % discreet G
-    G = [ O                     O               O     O
+    G = [-0.5 * I * T_gps^2     O               O     O
          -DCM * T_gps           O               O     O
           O                     DCM * T_gps     O     O
           O                     O               I     O

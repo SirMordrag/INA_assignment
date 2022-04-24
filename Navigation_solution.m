@@ -94,7 +94,7 @@ for index = 1:data_length
 
         %% F: CORRECTION UPDATE (KF)
         % Kalman Gain Equation
-        K_kf = P_kf_predict * H_kf.' * (H_kf * P_kf_predict * H_kf.' + R_kf)^-1;
+        K_kf = P_kf_predict * H_kf.' / (H_kf * P_kf_predict * H_kf.' + R_kf);
 
         % Update Estimate Equation
         innovation_kf = z_kf - H_kf * x_kf_predict;
