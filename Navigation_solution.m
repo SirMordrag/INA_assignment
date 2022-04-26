@@ -26,8 +26,8 @@ data_length = data_length(1);
 [P, V, DCM] = initial_conditions(data_acc, data_gpsP, data_gpsV, 60);
 [R_M, R_N, g_N] = get_pseudo_constants(P(1), P(2), P(3));
 % correction
-f_bias = 0;
-w_bias = 0;
+f_bias = zeros(3,1);
+w_bias = zeros(3,1);
 % KF matrices
 nx = 15;
 nz = 6;
@@ -35,7 +35,7 @@ nz = 6;
 [x_kf, z_kf, P_kf, Q_c, R_kf, K_kf, H_kf, x_kf_predict] = init_kf_matrices(nx, nz, G_kf);
 P_kf_predict = P_kf;
 % auxiliary
-SAVED_DATA = zeros(data_length, 3 + 3 + 9 + 6 + 15 + 90 + 15);
+SAVED_DATA = zeros(data_length, 3 + 3 + 9 + 6 + 15 + 90 + 15 + 3 + 3);
 innovation_kf = zeros(6,1); x_kf_saved = zeros(15,1);
 kf_counter = 0;
 pitch = 0; roll = 0; yaw = 0; 
@@ -47,7 +47,7 @@ for index = 1:data_length
         fprintf("\b\b\b\b\b\b\b\b\b\b\b\b%6i, %3.0f%%", index, 100 * index/data_length);
     end
     %% A: MEASUREMENT
-    f = data_acc(index,:).' * 9.81; % g to m2/s
+    f = data_acc(index,:).' * 9.80665; % g to m/s2
     w = data_gyro(index,:).' * 0.0174532925; % deg/s to rad/s
 
     %% B: MEASUREMENT CORRECTIONS
@@ -78,13 +78,13 @@ for index = 1:data_length
 
     % If reference measurements are valid, full cycle is performed. Otherwise, we go back to state A
     if ~isnan(p_gps(1)) % GPS data are not NaN, good to go for the whole cycle
-        % turn GPS of for a moment
-%         if (index > 100000 && index < 112000)
-%             P_kf = Q_kf;
-%             P_kf_predict = P_kf;
-%             SAVED_DATA(index,:) = [P; V; reshape(DCM,[],1); innovation_kf; reshape(diag(P_kf),[],1); reshape(K_kf,[],1); x_kf_saved];
-%             continue;
-%         end
+        % turn GPS of for a moment               -FLAG-
+        if (index > 100000 && index < 112000) && false
+            P_kf = Q_kf;
+            P_kf_predict = P_kf;
+            SAVED_DATA(index,:) = [P; V; reshape(DCM,[],1); innovation_kf; reshape(diag(P_kf),[],1); reshape(K_kf,[],1); x_kf_saved; f_bias; w_bias];
+            continue;
+        end
         % update counter
         kf_counter = kf_counter + 1;
         %% E: DELTA MEASUREMENT VECTOR
@@ -111,25 +111,25 @@ for index = 1:data_length
         % apply corrections to Position, Velocity, DCM immediately
         P = P + x_kf(1:3);
         V = V + x_kf(4:6);
-        DCM = angle2dcm(x_kf(9), x_kf(8), x_kf(7), "ZYX");
+        [yaw, roll, pitch] = dcm2angle(DCM, "ZYX");
+        DCM = angle2dcm(yaw - x_kf(9), roll - x_kf(8), pitch - x_kf(7), "ZYX");
 
         % corrections for for bias of IMU measurements are dx_a and dx_g from state vector (I think)
-        f_bias = f_bias + x_kf(10:12)/40; % divide by number of samples that went by in IMU (integration)
+        f_bias = f_bias + x_kf(10:12) .* [1 1 -1].' /40; % divide by number of samples that went by in IMU (integration)
         w_bias = w_bias + x_kf(13:15)/40;
 
         %% H: STATE VECTOR RESET
         % set state vector to zeros
         x_kf_saved = x_kf;
-        x_kf = x_kf .* [0 0 0  0 0 0  1 1 1  0 0 0  0 0 0].';
+        x_kf = zeros(nx,1);
 
         %% I: TIME UPDATE (KF)
         
         % discretize Q
-        Q_kf = G_kf * Q_c * G_kf.';
+        Q_kf = 0.5 * T_gps * (F_kf * G_kf * Q_c * G_kf.' + G_kf * Q_c * G_kf.' * F_kf.');
 
         % state extrapolation
         x_kf_predict = zeros(nx, 1);
-        x_kf_predict = F_kf * x_kf; % case without reset
 
         % uncertainty extrapolation
         P_kf_predict = F_kf * P_kf * F_kf.' + Q_kf;
@@ -137,7 +137,7 @@ for index = 1:data_length
     end % KF loop
 
     % save data for plot
-     SAVED_DATA(index,:) = [P; V; reshape(DCM,[],1); innovation_kf; reshape(diag(P_kf),[],1); reshape(K_kf,[],1); x_kf_saved];
+     SAVED_DATA(index,:) = [P; V; reshape(DCM,[],1); innovation_kf; reshape(diag(P_kf),[],1); reshape(K_kf,[],1); x_kf_saved; f_bias; w_bias];
 
 end % main loop
 fprintf("\nFinished calculating in %.1f seconds.\n", toc);

@@ -49,10 +49,19 @@ function [F, G] = get_model_matrices(P, V, DCM, f, w, r, R_M, R_N, T_gps)
     
     %% uncertainties
     % dunno
-    Fva = O;
-    Frg = O;
+    Fva = 9.80665 * I;
+    Frg = I;
     Faa = O;
     Fgg = O;
+
+    %% NED to LLA matrix
+    clat = cos(P(2));
+    slat = sin(P(2));
+    clon = cos(P(1));
+    slon = sin(P(1));
+    C = [-clon*slat    -slon*slat     clat
+         -slon          clon          0
+         -clon*clat    -slon*clat    -slat];
     
     %% model
     % continous F
@@ -64,9 +73,8 @@ function [F, G] = get_model_matrices(P, V, DCM, f, w, r, R_M, R_N, T_gps)
     % discreet F
     F = eye(15) + F_c * T_gps + 0.5 * T_gps^2 * F_c^2;
     
-    % WARNING element (1,1) is probably missing something (C)
     % discreet G
-    G = [-0.5 * I * T_gps^2     O               O     O
+    G = [-0.5 * C * T_gps^2     O               O     O
          -DCM * T_gps           O               O     O
           O                     DCM * T_gps     O     O
           O                     O               I     O

@@ -11,10 +11,10 @@ function [x_kf, z_kf, P_kf, Q_c, R_kf, K_kf, H_kf, x_kf_predict] = init_kf_matri
     % noise vector
     % TODO actual values
     % TUNING
-    ni_a = 1 * [1 1 1]; % ACC noise
-    ni_g = 1 * [1 1 1]; % GYRO noise
-    w_a = 10 * [1 1 1]; % ACC bias
-    w_g = 10 * [1 1 1]; % GYRO bias
+    ni_a = [0.003  0.0036 0.0039]; % ACC noise
+    ni_g = [0.0924 0.1242 0.0970]; % GYRO noise
+    w_a = 0.01 * [1 1 1]; % ACC bias
+    w_g = 0.01 * [1 1 1]; % GYRO bias
     q = [ni_a ni_g w_a w_g].';
     Q_c = q .* eye(12);
 
