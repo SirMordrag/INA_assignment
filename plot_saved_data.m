@@ -57,7 +57,7 @@ function [] = plot_saved_data(SAVED_DATA, INPUT_DATA)
     t = title("XY Position (est)");
     plot(position(:,1), position(:,2))
     saveas(gcf, ['Figures/', t.String, '.png'])
-
+return
     figure;hold on;
     t = title("XY Position (GPS)");
     plot(data_gpsP(1:data_length,1), data_gpsP(1:data_length,2), '.')

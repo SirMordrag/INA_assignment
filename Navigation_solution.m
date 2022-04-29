@@ -37,6 +37,7 @@ P_kf_predict = P_kf;
 % auxiliary
 SAVED_DATA = zeros(data_length, 3 + 3 + 9 + 6 + 15 + 90 + 15 + 3 + 3);
 innovation_kf = zeros(6,1); x_kf_saved = zeros(15,1);
+P_initial = P_kf;
 kf_counter = 0;
 pitch = 0; roll = 0; yaw = 0; 
 %% main loop
@@ -79,9 +80,9 @@ for index = 1:data_length
     % If reference measurements are valid, full cycle is performed. Otherwise, we go back to state A
     if ~isnan(p_gps(1)) % GPS data are not NaN, good to go for the whole cycle
         % turn GPS of for a moment               -FLAG-
-        if (index > 100000 && index < 112000) && false
-            P_kf = Q_kf;
-            P_kf_predict = P_kf;
+        if (index > 100000 && index < 112000) && true
+            P_kf = P_initial;
+            P_kf_predict = P_initial;
             SAVED_DATA(index,:) = [P; V; reshape(DCM,[],1); innovation_kf; reshape(diag(P_kf),[],1); reshape(K_kf,[],1); x_kf_saved; f_bias; w_bias];
             continue;
         end
@@ -115,7 +116,7 @@ for index = 1:data_length
         DCM = angle2dcm(yaw - x_kf(9), roll - x_kf(8), pitch - x_kf(7), "ZYX");
 
         % corrections for for bias of IMU measurements are dx_a and dx_g from state vector (I think)
-        f_bias = f_bias + x_kf(10:12) .* [1 1 -1].' /40; % divide by number of samples that went by in IMU (integration)
+        f_bias = f_bias + x_kf(10:12) .* [1 1 1].' /40; % divide by number of samples that went by in IMU (integration)
         w_bias = w_bias + x_kf(13:15)/40;
 
         %% H: STATE VECTOR RESET
