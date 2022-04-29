@@ -1,8 +1,13 @@
-function [F, G] = get_model_matrices(P, V, DCM, f, w, r, R_M, R_N, T_gps)
+function [F, G] = get_model_matrices(P, V, DCM, f, P_old, r, R_M, R_N, T_gps)
     % gets F and G matrix for the model
     % inputs: position (vec), velocity (vec), DCM (mat), acc (vec), gyro (vec), rho (vec), kd (num), F63 (num), R_M (num), R_N (num), T_gps (num)
     I = eye(3);
     O = zeros(3);
+
+    % w_N, w_E, w_D
+    w = [ (P(2)-P_old(2)) * cos(P(1))
+         -(P(1)-P_old(1))
+         -(P(2)-P_old(2)) * sin(P(1))];
     
     %% position
     Fpp = [ 0                                           0    -V(1)/(R_M+P(3))^2

@@ -15,11 +15,11 @@ function [P, V, DCM] = initial_conditions(data_acc, data_gpsP, data_gpsV, init_t
 
     % pitch & roll from ACC
     f_mean = mean(data_acc(1:init_acc_samples,:));
-    pitch = atan2(f_mean(1), f_mean(3)) + pi;
+    pitch = atan2(f_mean(1), f_mean(3)) - pi;
     roll  = atan2(f_mean(2), f_mean(3)) + pi;
     
     % yaw from linear regression of position in init
-    P_fit = data_gpsP(1:init_gps_samples,1:2);
+    P_fit = data_gpsP(1:init_gps_samples,1:end);
     yaw = P_fit(:,1)\P_fit(:,2);
 
     % DCM from angles
