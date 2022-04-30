@@ -1,7 +1,7 @@
 function [] = plot_saved_data(SAVED_DATA, INPUT_DATA)
     
     % NOTE: in case program takes too long to run, switch this to true
-    is_quick_plotting = true;
+    is_quick_plotting = false;
 
     %% Unpack data 
     data_length = size(SAVED_DATA);
@@ -24,107 +24,100 @@ function [] = plot_saved_data(SAVED_DATA, INPUT_DATA)
     bias_gyro = SAVED_DATA(:,145:147);
     clear SAVED_DATA;
 
-    % process, reshape, convert
-    attitude = zeros(data_length, 3);
-    K_matrix = zeros(data_length, 15, 6);
-    fprintf("Processing data for plot:     ");
-    for i = 1:data_length
-      if mod(i, 1000) == 0
-        fprintf("\b\b\b\b%3.0f%%", 100 * i/data_length);
-      end
-      % attitude angles
-      if ~is_quick_plotting
-          [yaw, roll, pitch] = dcm2angle(reshape(saved_DCM(i,:), [3, 3]), "ZYX");
-          attitude(i,:) = rad2deg([pitch; roll; yaw]);
-      end
-      % Kalman Gain
-      K_matrix(i,:,:) = reshape(K_matrix_arr(i,:), 15, 6);
-    end
-    clear saved_DCM;
-    fprintf("\nPlotting\n");
-    
     %% Plot
     t = mkdir('Figures');
 
-    figure;hold on;
-    t = title("XY Position");
+    % XY Position
+    figure;
+    subplot(1,3,1);
+    hold on;
     plot(position(:,1), position(:,2))
     plot(data_gpsP(1:data_length,1), data_gpsP(1:data_length,2), '.')
-    saveas(gcf, ['Figures/', t.String, '.png'])
+    title("XY Position overlay");
     legend('Estimate', 'GPS only')
-
-    figure;hold on;
-    t = title("XY Position (est)");
+    subplot(1,3,2);
     plot(position(:,1), position(:,2))
-    saveas(gcf, ['Figures/', t.String, '.png'])
-
-    figure;hold on;
-    t = title("XY Position (GPS)");
+    title("XY Position (est)");
+    subplot(1,3,3);
     plot(data_gpsP(1:data_length,1), data_gpsP(1:data_length,2), '.')
-    saveas(gcf, ['Figures/', t.String, '.png'])
+    title("XY Position (GPS)");
+    saveas(gcf, ['Figures/', 'XY position', '.png'])
 
-    figure;hold on;
-    t = title("X position");
+    % Position Components
+    figure;
+    subplot(1,3,1);hold on;
     plot(position(:,1))
     plot(data_gpsP(1:data_length,1), '.')
     legend('Estimate', 'GPS only')
-    saveas(gcf, ['Figures/', t.String, '.png'])
-    
-    figure;hold on;
-    t = title("Y position");
+    title("X position");
+    subplot(1,3,2);hold on;
     plot(position(:,2))
     plot(data_gpsP(1:data_length,2), '.')
+    title("Y position");
     legend('Estimate', 'GPS only')
-    saveas(gcf, ['Figures/', t.String, '.png'])
-    
-    figure;hold on;
-    t = title("Z position");
+    subplot(1,3,3);hold on;
     plot(position(:,3))
     plot(data_gpsP(1:data_length,3), '.')
+    title("Z position");
     legend('Estimate', 'GPS only')
-    saveas(gcf, ['Figures/', t.String, '.png'])
-    
-    figure;hold on;
-    t = title("X velocity");
+    saveas(gcf, ['Figures/', 'Position', '.png'])
+
+    % Velocity Components
+    figure;
+    subplot(1,3,1);hold on;
     plot(velocity(:,1))
     plot(data_gpsV(1:data_length,1), '.')
     legend('Estimate', 'GPS only')
-    saveas(gcf, ['Figures/', t.String, '.png'])
-    
-    figure;hold on;
-    t = title("Y velocity");
+    title("X velocity");
+    subplot(1,3,2);hold on;
     plot(velocity(:,2))
     plot(data_gpsV(1:data_length,2), '.')
+    title("Y velocity");
     legend('Estimate', 'GPS only')
-    saveas(gcf, ['Figures/', t.String, '.png'])
-    
-    figure;hold on;
-    t = title("Z velocity");
+    subplot(1,3,3);hold on;
     plot(velocity(:,3))
     plot(data_gpsV(1:data_length,3), '.')
+    title("Z velocity");
     legend('Estimate', 'GPS only')
-    saveas(gcf, ['Figures/', t.String, '.png'])
-    
-    if ~is_quick_plotting
-        figure;hold on;
-        t = title("Angles (Estimate only)");
-        plot(attitude)
-        legend('Pitch', 'Roll', 'Yaw')
-        saveas(gcf, ['Figures/', t.String, '.png'])
-    end
+    saveas(gcf, ['Figures/', 'Velocity', '.png'])
 
-    figure;hold on;
-    t = title("Innovations");
-    plot(innovations)
-    legend('dPx','dPy','dPz','dVx','dVy','dVz')
-    saveas(gcf, ['Figures/', t.String, '.png'])
+    % Innovations
+    figure;
+    subplot(1,2,1); hold on;
+    plot(innovations(:,1:3))
+    title("Innovations: dP");
+    legend('dPx','dPy','dPz')
+    subplot(1,2,2); hold on;
+    plot(innovations(:,4:6))
+    title("Innovations: dV");
+    legend('dVx','dVy','dVz')
+    saveas(gcf, ['Figures/', 'Innovations', '.png'])
 
-    figure;hold on;
-    t = title("P matrix");
-    plot(P_matrix_diag)
-    legend()
-    saveas(gcf, ['Figures/', t.String, '.png'])
+    % P matrix
+    figure;
+    subplot(2,3,1);hold on;
+    plot(P_matrix_diag(:,1:3))
+    title("P matrix: P");
+    legend('dPx','dPy','dPz')
+    subplot(2,3,2);hold on;
+    plot(P_matrix_diag(:,4:6))
+    title("P matrix: V");
+    legend('dVx','dVy','dVz')
+    subplot(2,3,3);hold on;
+    plot(P_matrix_diag(:,7:9))
+    title("P matrix: r");
+    legend('rx', 'ry', 'rz')
+    subplot(2,3,4);hold on;
+    plot(P_matrix_diag(:,10:12))
+    title("P matrix: bacc");
+    legend('b_acc_x', 'b_acc_y', 'b_acc_z')
+    subplot(2,3,5);hold on;
+    plot(P_matrix_diag(:,13:15))
+    title("P matrix: bgyro");
+    legend('b_gyro_x', 'b_gyro_y', 'b_gyro_z')
+    saveas(gcf, ['Figures/', 'P matrix', '.png'])
 
+    % K matrix
     figure;hold on;
     subplot(3,2,1);
     plot(K_matrix_arr(:,1:15))
@@ -146,18 +139,63 @@ function [] = plot_saved_data(SAVED_DATA, INPUT_DATA)
     title("K Matrix - Row 6");
     saveas(gcf, ['Figures/', 'K matrix', '.png'])
 
-    figure;hold on;
-    t = title("State Vector");
-    plot(state_vector)
-    legend('dPx','dPy','dPz','dVx','dVy','dVz', 'rx', 'ry', 'rz', 'b_acc_x', 'b_acc_y', 'b_acc_z', 'b_gyro_x', 'b_gyro_y', 'b_gyro_z')
-    saveas(gcf, ['Figures/', t.String, '.png'])
+    % State Vector
+    figure;
+    subplot(2,3,1);hold on;
+    plot(state_vector(:,1:3))
+    title("State Vector: dP");
+    legend('dPx','dPy','dPz')
+    subplot(2,3,2);hold on;
+    plot(state_vector(:,4:6))
+    title("State Vector: dV");
+    legend('dVx','dVy','dVz')
+    subplot(2,3,3);hold on;
+    plot(state_vector(:,7:9))
+    title("State Vector: dr");
+    legend('rx', 'ry', 'rz')
+    subplot(2,3,4);hold on;
+    plot(state_vector(:,10:12))
+    title("State Vector: dbacc");
+    legend('b_acc_x', 'b_acc_y', 'b_acc_z')
+    subplot(2,3,5);hold on;
+    plot(state_vector(:,13:15))
+    title("State Vector: dbgyro");
+    legend('b_gyro_x', 'b_gyro_y', 'b_gyro_z')
+    saveas(gcf, ['Figures/', 'State Vector', '.png'])
 
-    figure;hold on;
-    t = title("Biases");
+    % Biases
+    figure;
+    subplot(1,2,1);hold on;
     plot(bias_acc)
+    title("Accelerometer Biases");
+    legend('acc X', 'acc Y','acc Z')
+    subplot(1,2,2);hold on;
     plot(bias_gyro)
-    legend('acc X', 'acc Y','acc Z','gyro X','gyro Y','gyro Z')
-    saveas(gcf, ['Figures/', t.String, '.png'])
+    legend('gyro X','gyro Y','gyro Z')
+    title("Gyro Biases")
+    saveas(gcf, ['Figures/', 'Biases', '.png'])
 
+    if is_quick_plotting
+        return
+    end
+
+    %% angles
+    attitude = zeros(data_length, 3);
+    fprintf("Plotting angles, this will take a couple of minutes\n");
+    fprintf("Processing data:     ");
+    for i = 1:data_length
+      if mod(i, 1000) == 0
+        fprintf("\b\b\b\b%3.0f%%", 100 * i/data_length);
+      end
+      % attitude angles
+      [yaw, roll, pitch] = dcm2angle(reshape(saved_DCM(i,:), [3, 3]), "ZYX");
+      attitude(i,:) = rad2deg([pitch; roll; yaw]);
+    end
+
+    figure;hold on;
+    t = title("Angles (Estimate only)");
+    plot(attitude)
+    legend('Pitch', 'Roll', 'Yaw')
+    saveas(gcf, ['Figures/', t.String, '.png'])
 end
 
