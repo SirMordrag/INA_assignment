@@ -182,6 +182,7 @@ function [] = plot_saved_data(SAVED_DATA, INPUT_DATA)
     %% angles
     attitude = zeros(data_length, 3);
     fprintf("Plotting angles, this will take a couple of minutes\n");
+    fprintf("Note: If it takes too long, please set 'is_quick_plotting' to true in plot_saved_data function (line 4). Attitude will not be plotted.\n")
     fprintf("Processing data:     ");
     for i = 1:data_length
       if mod(i, 1000) == 0

@@ -154,8 +154,7 @@ end % main loop
 fprintf("\nFinished calculating in %.1f seconds.\n", toc);
 
 %% post processing
-fprintf("Plotting data, this may take couple of minutes.\n"); tic;
-fprintf("Note: If it takes too long, please set 'is_quick_plotting' to true in plot_saved_data function (line 4). Some parameters (e.g. attitude) will not be plotted.\n")
+fprintf("Plotting data.\n"); tic;
 plot_saved_data(SAVED_DATA, data);
 fprintf("Finished plotting in %.1f seconds.\n", toc);
 

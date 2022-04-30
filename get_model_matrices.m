@@ -24,7 +24,7 @@ function [F, G] = get_model_matrices(P, V, DCM, f, P_old, r, R_M, R_N, T_gps)
     kd = 0; % see page 397 of book, actually kd = vd / Re, where Re is Earth radius -> waaaaay to small -> omitted
 
     Fvp = [-r(1)*V(2)/cos(P(1))^2     0     r(2)*kd-r(1)*r(3)
-            r(1)*V(1)/cos(P(1))^2     0    -r(2)*kd-r(1)*r(3)
+            r(1)*V(1)/cos(P(1))^2     0    -r(2)*r(3)
             0                         0     r(1)^2 + r(2)^2];
     
     
