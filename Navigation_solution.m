@@ -22,9 +22,6 @@ T_gps = 1/5;
 data_length = size(data);
 data_length = data_length(1);
 
-% TEST: data length = * freq * seconds * MINUTES
-% data_length = 200 * 60 * 5;
-
 %% prepare variables
 % strapdown
 [P, V, DCM] = initial_conditions(data_acc, data_gpsP, data_gpsV, 60);
