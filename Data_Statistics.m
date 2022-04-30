@@ -1,4 +1,4 @@
-close all;
+% Get some useful statisticts for tuning KF
 
 load("B(E)3(9)M38IMA_Data_Individual_Semester_Work.mat");
 
@@ -6,7 +6,7 @@ data_length = 25000
 T_imu = 1/200;
 data_time = data_length* T_imu;
 
-data_acc  = [data(1:data_length,3), data(1:data_length,5), data(1:data_length,7)] .* [1, 1, 1];
+data_acc  = [data(1:data_length,3), data(1:data_length,5), data(1:data_length,7)];
 data_gyro = [data(1:data_length,11), data(1:data_length,13), data(1:data_length,15)];
 data_gpsP = [data(1:data_length,20), data(1:data_length,21), data(1:data_length,22)];
 data_gpsV = [data(1:data_length,28), data(1:data_length,29), data(1:data_length,27)];
@@ -23,7 +23,6 @@ data_gpsV(any(isnan(data_gpsV),2),:) = [];
 % plot(data_gpsP(:,2))
 % figure;
 % plot(data_gpsV)
-
 
 sigma_acc = sqrt(var(data_acc));
 sigma_gyro = sqrt(var(data_gyro));
@@ -71,7 +70,6 @@ for i = 1:data_length
     DCM = DCM + dDCM * T_imu;
 end
 
-
 P_diff = P - mean(data_gpsP()).';
 P_diff_per_s = P_diff / data_time;
 V_diff = V - mean(data_gpsV()).';
@@ -79,7 +77,6 @@ V_diff_per_s = V_diff / data_time;
 [yaw1, roll1, pitch1] = dcm2angle(DCM, "ZYX");
 R_diff = [pitch1 - pitch; roll1 - roll; yaw1 - yaw];
 R_diff_per_s = R_diff / data_time;
-
 
 P_diff_per_KF_period = sqrt((P_diff_per_s / 5).^2);
 V_diff_per_KF_period = sqrt((V_diff_per_s / 5).^2);

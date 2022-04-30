@@ -1,6 +1,7 @@
 function [] = plot_saved_data(SAVED_DATA, INPUT_DATA)
+    % Plot saved data
     
-    % NOTE: in case program takes too long to run, switch this to true
+    % FLAG: in case program takes too long to run, switch this to true
     is_quick_plotting = false;
 
     %% Unpack data 
@@ -175,6 +176,7 @@ function [] = plot_saved_data(SAVED_DATA, INPUT_DATA)
     title("Gyro Biases")
     saveas(gcf, ['Figures/', 'Biases', '.png'])
 
+    % return if angles are not to be plotted
     if is_quick_plotting
         return
     end
@@ -199,4 +201,3 @@ function [] = plot_saved_data(SAVED_DATA, INPUT_DATA)
     legend('Pitch', 'Roll', 'Yaw')
     saveas(gcf, ['Figures/', t.String, '.png'])
 end
-

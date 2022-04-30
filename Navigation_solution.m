@@ -1,6 +1,10 @@
+% Main File
 clc;
 clearvars;
 close all;
+
+% FLAG: switch off GPS for a minute during the cycle
+GPS_switch_off = true;
 
 %% data
 % data format: [x, y, z] or [latitude, longitude, altitude]
@@ -21,26 +25,23 @@ data_length = data_length(1);
 % TEST: data length = * freq * seconds * MINUTES
 % data_length = 200 * 60 * 5;
 
-%% declare, initialise
+%% prepare variables
 % strapdown
 [P, V, DCM] = initial_conditions(data_acc, data_gpsP, data_gpsV, 60);
 [R_M, R_N, g_N] = get_pseudo_constants(P(1), P(2), P(3));
-% correction
-f_bias = zeros(3,1);
-w_bias = zeros(3,1);
 % KF matrices
 nx = 15;
 nz = 6;
 [F_kf, G_kf] = get_model_matrices(P, V, DCM, [0,0,0], [0,0,0], [0,0,0], R_M, R_N, T_gps); % get G matrix
 [x_kf, z_kf, P_kf, Q_c, R_kf, K_kf, H_kf, x_kf_predict] = init_kf_matrices(nx, nz, G_kf);
 P_kf_predict = P_kf;
-% auxiliary
-SAVED_DATA = zeros(data_length, 3 + 3 + 9 + 6 + 15 + 90 + 15 + 3 + 3);
-innovation_kf = zeros(6,1); x_kf_saved = zeros(15,1);
 P_initial = P_kf;
-kf_counter = 0;
-pitch = 0; roll = 0; yaw = 0; 
 P_old = P;
+% initialization
+f_bias = zeros(3,1); w_bias = zeros(3,1); innovation_kf = zeros(nz,1); x_kf_saved = zeros(nx,1);
+kf_counter = 0; pitch = 0; roll = 0; yaw = 0;
+% array for saving data
+SAVED_DATA = zeros(data_length, 3 + 3 + 9 + 6 + 15 + 90 + 15 + 3 + 3);
 
 %% main loop
 fprintf("Procesing %6i samples, corresponding to %.1f minutes of data\n     Done             ", data_length, data_length/12000); tic;
@@ -81,8 +82,8 @@ for index = 1:data_length
 
     % If reference measurements are valid, full cycle is performed. Otherwise, we go back to state A
     if ~isnan(p_gps(1)) % GPS data are not NaN, good to go for the whole cycle
-        % turn GPS of for a minute               -FLAG-
-        if (index > 100000 && index < 112000) && true
+        % turn GPS of for a minute
+        if (index > 100000 && index < 112000) && GPS_switch_off
             P_kf = P_initial;
             P_kf_predict = P_initial;
             SAVED_DATA(index,:) = [P; V; reshape(DCM,[],1); innovation_kf; reshape(diag(P_kf),[],1); reshape(K_kf,[],1); x_kf_saved; f_bias; w_bias];
@@ -133,9 +134,7 @@ for index = 1:data_length
             x_kf = x_kf .* [0 0 0  0 0 0  0 0 0  1 1 1  1 1 1].';
         end
         
-
         %% I: TIME UPDATE (KF)
-        
         % discretize Q
         Q_kf = 0.5 * T_gps * (F_kf * G_kf * Q_c * G_kf.' + G_kf * Q_c * G_kf.' * F_kf.');
 
@@ -156,6 +155,5 @@ fprintf("\nFinished calculating in %.1f seconds.\n", toc);
 %% post processing
 fprintf("Plotting data.\n"); tic;
 plot_saved_data(SAVED_DATA, data);
-fprintf("Finished plotting in %.1f seconds.\n", toc);
-
+fprintf("\nFinished plotting in %.1f seconds.\n", toc);
 fprintf("Finished.\n");

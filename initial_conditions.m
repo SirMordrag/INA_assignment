@@ -1,4 +1,5 @@
 function [P, V, DCM] = initial_conditions(data_acc, data_gpsP, data_gpsV, init_time)
+    % Get initial position, velocity and attitude
     % assuming steady conditions in init period, but some motion in direction of flight
 
     % init_time to samples

@@ -1,4 +1,5 @@
 function [x_kf, z_kf, P_kf, Q_c, R_kf, K_kf, H_kf, x_kf_predict] = init_kf_matrices(nx, nz, G)
+    % Initialize matrices and vectors for KF
     
     % state & prediction & measurement vectors
     x_kf = zeros(nx, 1);   
@@ -8,8 +9,6 @@ function [x_kf, z_kf, P_kf, Q_c, R_kf, K_kf, H_kf, x_kf_predict] = init_kf_matri
     z_kf = zeros(nz, 1);    
 
     % Process Noise Uncertainty
-    % noise vector
-    % TODO actual values
     % TUNING
     ni_a = [0.027  0.034 0.035]; % ACC noise
     ni_g = [0.0016 0.0022 0.017]; % GYRO noise
@@ -33,5 +32,4 @@ function [x_kf, z_kf, P_kf, Q_c, R_kf, K_kf, H_kf, x_kf_predict] = init_kf_matri
     r_p = [0.00001 0.00002 0.16]; % position error (IMU & GPS) [°lat °lng m]
     r_v = [0.54 0.34 0.1]; % velocity error (IMU & GPS) [m/s]
     R_kf = [r_p r_v].' .* eye(nz);
-    
 end
